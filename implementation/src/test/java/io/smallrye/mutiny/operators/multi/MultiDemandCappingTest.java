@@ -4,8 +4,14 @@ import static java.lang.Math.max;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.LongFunction;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import io.smallrye.mutiny.Multi;
@@ -113,5 +119,29 @@ class MultiDemandCappingTest {
 
         sub.request(10L);
         sub.assertFailedWith(RuntimeException.class, "boom");
+    }
+
+    @ParameterizedTest
+    @MethodSource("failingRequests")
+    void failuresMustCancelUpstream(LongFunction<Long> function, long request, Class<? extends Throwable> failure) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> nothing()
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .capDemandsUsing(function)
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(request);
+        sub.assertFailedWith(failure);
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> failingRequests() {
+        return Stream.of(
+                Arguments.of((LongFunction<Long>) requested -> requested, -1L, IllegalArgumentException.class),
+                Arguments.of((LongFunction<Long>) requested -> -1L, 10L, IllegalArgumentException.class),
+                Arguments.of((LongFunction<Long>) requested -> 2L * requested, 10L, IllegalStateException.class),
+                Arguments.of((LongFunction<Long>) requested -> {
+                    throw new RuntimeException("boom");
+                }, 10L, RuntimeException.class));
     }
 }

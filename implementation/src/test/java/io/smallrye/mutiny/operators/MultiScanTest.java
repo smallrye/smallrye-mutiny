@@ -1,6 +1,9 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
@@ -122,6 +125,40 @@ public class MultiScanTest {
 
         subscriber.assertItems(1)
                 .assertFailedWith(IllegalArgumentException.class, "boom");
+    }
+
+    @Test
+    public void testThatUpstreamIsCancelledWhenScannerThrowsException() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+
+        Multi.createFrom().<Integer> emitter(emitter -> emitter.emit(1).emit(2))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().scan((a, b) -> {
+                    throw new IllegalArgumentException("boom");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertItems(1)
+                .assertFailedWith(IllegalArgumentException.class, "boom");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testThatUpstreamIsCancelledWhenScannerThrowsExceptionWithSupplier() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+
+        Multi.createFrom().<Integer> emitter(emitter -> emitter.emit(1).emit(2))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().scan(() -> 1, (a, b) -> {
+                    throw new IllegalArgumentException("boom");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertItems(1)
+                .assertFailedWith(IllegalArgumentException.class, "boom");
+        assertThat(cancelled).isTrue();
     }
 
     @Test

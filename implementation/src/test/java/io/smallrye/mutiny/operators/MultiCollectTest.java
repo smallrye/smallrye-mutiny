@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiCollectTest {
 
@@ -474,6 +476,39 @@ public class MultiCollectTest {
                 .collect().asList()
                 .await().atMost(Duration.ofSeconds(5)));
         assertThat(err.getMessage()).contains("than 0");
+    }
+
+    @Test
+    public void testAccumulatorNotInvokedAfterFailure() {
+        AtomicInteger calls = new AtomicInteger();
+        Multi<Integer> source = new AbstractMulti<>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(new Flow.Subscription() {
+                    @Override
+                    public void request(long n) {
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onItem(3);
+                subscriber.onCompletion();
+            }
+        };
+
+        UniAssertSubscriber<List<Integer>> subscriber = source.collect()
+                .in(ArrayList<Integer>::new, (list, i) -> {
+                    calls.incrementAndGet();
+                    throw new IllegalStateException("boom");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(calls).hasValue(1);
     }
 
     static class Person {

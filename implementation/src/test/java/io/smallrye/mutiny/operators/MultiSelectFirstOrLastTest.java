@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -25,6 +26,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.operators.multi.MultiSelectFirstUntilOtherOp;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import junit5.support.InfrastructureResource;
@@ -172,6 +174,15 @@ public class MultiSelectFirstOrLastTest {
     }
 
     @Test
+    public void testSelectLastCompletesWhenDemandMatchesItems() {
+        Multi.createFrom().items(1, 2, 3)
+                .select().last(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(2))
+                .assertItems(2, 3)
+                .assertCompleted();
+    }
+
+    @Test
     public void testSelectSomeLastItems() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -284,6 +295,20 @@ public class MultiSelectFirstOrLastTest {
     }
 
     @Test
+    public void rejectBadRequestsOnSelectLastAndCancelUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .select().last(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testSelectByTimeWithFailure() {
         Multi<Integer> multi = Multi.createBy().concatenating().streams(
                 Multi.createFrom().range(1, 5),
@@ -366,6 +391,35 @@ public class MultiSelectFirstOrLastTest {
                 .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscriber.getItems()).hasSize(2);
+    }
+
+    @Test
+    public void testSelectByTimeCancelsUpstreamWhenDurationExpires() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        Multi.createFrom().nothing()
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .select().first(Duration.ofMillis(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .awaitCompletion();
+
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testSelectFirstUntilOtherCancelsUpstreamWhenOtherFails() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> otherEmitter = new AtomicReference<>();
+        Multi<Integer> upstream = Multi.createFrom().<Integer> nothing()
+                .onCancellation().invoke(() -> cancelled.set(true));
+        Multi<Integer> other = Multi.createFrom().<Integer> emitter(otherEmitter::set);
+
+        AssertSubscriber<Integer> subscriber = new MultiSelectFirstUntilOtherOp<>(upstream, other)
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+        otherEmitter.get().fail(new TestException("boom"));
+
+        subscriber.assertFailedWith(TestException.class, "boom");
+        assertThat(cancelled).isTrue();
     }
 
     @Test

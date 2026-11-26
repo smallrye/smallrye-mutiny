@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +43,16 @@ public class UniCreateFromCompletionStageTest {
         Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
         subscriber.assertFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testCompletionExceptionWithoutCauseIsForwarded() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        CompletionException failure = new CompletionException("boom", null);
+        future.completeExceptionally(failure);
+        UniAssertSubscriber<String> subscriber = Uni.createFrom().completionStage(future)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.getFailure()).isSameAs(failure);
     }
 
     @Test

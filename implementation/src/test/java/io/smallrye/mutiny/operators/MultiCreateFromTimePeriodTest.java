@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
@@ -194,6 +195,31 @@ public class MultiCreateFromTimePeriodTest {
         } finally {
             spyExecutor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testRequestAfterCancelDoesNotScheduleTicks() {
+        ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1);
+        try {
+            AssertSubscriber<Long> subscriber = Multi.createFrom().ticks()
+                    .startingAfter(Duration.ofHours(1))
+                    .onExecutor(scheduledExecutor).every(Duration.ofHours(1))
+                    .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+            subscriber.cancel();
+            subscriber.request(1);
+
+            assertThat(scheduledExecutor.getQueue()).isEmpty();
+        } finally {
+            scheduledExecutor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testSubMillisecondPeriodIsRejected() {
+        assertThatThrownBy(() -> Multi.createFrom().ticks().every(Duration.ofNanos(500)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("duration");
     }
 
 }

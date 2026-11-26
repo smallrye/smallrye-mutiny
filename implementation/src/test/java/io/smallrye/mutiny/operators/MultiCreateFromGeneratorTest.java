@@ -1,8 +1,12 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiCreateFromGeneratorTest {
 
@@ -216,6 +221,41 @@ public class MultiCreateFromGeneratorTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         sub.assertFailedWith(RuntimeException.class, "boom");
+    }
+
+    @Test
+    @DisplayName("A throwing initial state supplier signals onSubscribe before onFailure")
+    void testThrowingStateSupplierSignalsOnSubscribeFirst() {
+        List<String> signals = new CopyOnWriteArrayList<>();
+
+        Multi.createFrom().generator(
+                () -> {
+                    throw new IllegalStateException("boom");
+                },
+                (s, e) -> s)
+                .subscribe().withSubscriber(new MultiSubscriber<Object>() {
+                    @Override
+                    public void onSubscribe(Flow.Subscription subscription) {
+                        signals.add("onSubscribe");
+                    }
+
+                    @Override
+                    public void onItem(Object item) {
+                        signals.add("onItem");
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        signals.add("onFailure:" + failure.getClass().getSimpleName());
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                        signals.add("onCompletion");
+                    }
+                });
+
+        assertThat(signals).containsExactly("onSubscribe", "onFailure:IllegalStateException");
     }
 
     @Test

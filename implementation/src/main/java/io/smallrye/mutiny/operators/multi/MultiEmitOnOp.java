@@ -136,7 +136,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                     schedule();
                 }
             } else {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -165,7 +165,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                 Flow.Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
                 if (subscription != CANCELLED) {
                     done = true;
-                    cancelUpstream();
+                    subscription.cancel();
                     queue.clear();
                     downstream.onFailure(rejected);
                     super.cancel();

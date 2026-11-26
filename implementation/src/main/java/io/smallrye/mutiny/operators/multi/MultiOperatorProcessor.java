@@ -35,7 +35,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
     }
 
-    void failAndCancel(Throwable throwable) {
+    protected void failAndCancel(Throwable throwable) {
         Subscription subscription = getUpstreamSubscription();
         if (subscription != null) {
             subscription.cancel();
@@ -114,7 +114,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
         Subscription subscription = getUpstreamSubscription();
         if (subscription != CANCELLED) {
             if (numberOfItems <= 0) {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
                 return;
             }
             subscription.request(numberOfItems);

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -175,6 +177,54 @@ public class UniAwaitTest {
             assertThat(cancelled).isTrue();
             assertThat(terminated).isTrue();
         }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testCancellationOnInterruption() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Uni<Integer> uni = Uni.createFrom().<Integer> emitter(e -> {
+        }).onCancellation().invoke(() -> cancelled.set(true));
+
+        Thread.currentThread().interrupt();
+        try {
+            assertThatThrownBy(() -> uni.await().indefinitely()).hasCauseInstanceOf(InterruptedException.class);
+        } finally {
+            Thread.interrupted();
+        }
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    @Timeout(10)
+    public void testInterruptionIsPreservedWhenCancellationFails() {
+        Uni<Integer> uni = Uni.createFrom().emitter(e -> e.onTermination(() -> {
+            throw new IllegalStateException("boom");
+        }));
+
+        Thread.currentThread().interrupt();
+        boolean interrupted;
+        try {
+            assertThatThrownBy(() -> uni.await().indefinitely());
+        } finally {
+            interrupted = Thread.interrupted();
+        }
+        assertThat(interrupted).isTrue();
+    }
+
+    @Test
+    @Timeout(10)
+    public void testCancellationOnTimeoutBeforeSubscription() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        List<Runnable> tasks = new ArrayList<>();
+        Uni<Integer> uni = Uni.createFrom().<Integer> emitter(e -> {
+        }).onCancellation().invoke(() -> cancelled.set(true))
+                .runSubscriptionOn(tasks::add);
+
+        assertThatThrownBy(() -> uni.await().atMost(Duration.ofMillis(10))).isInstanceOf(TimeoutException.class);
+        tasks.forEach(Runnable::run);
+
+        assertThat(cancelled).isTrue();
     }
 
     @Nested

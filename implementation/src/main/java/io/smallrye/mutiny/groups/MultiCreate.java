@@ -561,6 +561,8 @@ public class MultiCreate {
      * The produced {@link Multi} never completes until cancellation by the subscriber.
      * <p>
      * The callbacks are invoked on the executor passed in {@link MultiTimePeriod#onExecutor(ScheduledExecutorService)}.
+     * <p>
+     * The interval must be at least 1 millisecond.
      *
      * @return the object to configure the time period (initial delay, executor, interval)
      */

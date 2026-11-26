@@ -23,6 +23,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -61,14 +62,14 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 executor.execute(() -> upstream.subscribe().withSubscriber(this));
             } catch (RejectedExecutionException rejection) {
-                onFailure(rejection);
+                Subscriptions.fail(downstream, rejection);
             }
         }
 
         @Override
         public void request(long numberOfItems) {
             if (numberOfItems <= 0) {
-                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                failAndCancel(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
                 return;
             }
             if (!isDone()) {
@@ -80,7 +81,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
                         }
                     });
                 } catch (RejectedExecutionException rejected) {
-                    onFailure(rejected);
+                    failAndCancel(rejected);
                 }
             }
         }

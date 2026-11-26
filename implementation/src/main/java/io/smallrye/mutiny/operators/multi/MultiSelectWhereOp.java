@@ -65,7 +65,7 @@ public class MultiSelectWhereOp<T> extends AbstractMultiOperator<T, T> {
             Subscription subscription = getUpstreamSubscription();
             if (subscription != CANCELLED) {
                 if (numberOfItems <= 0) {
-                    onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                    failAndCancel(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
                     return;
                 }
                 if (numberOfItems == Long.MAX_VALUE) {

@@ -445,6 +445,22 @@ public class MultiDistinctTest {
     }
 
     @Test
+    public void testSkipRepetitionsExceptionInComparatorCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+        Multi.createFrom().<Integer> emitter(emitter -> emitter.emit(1).emit(2))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .skip().repetitions((a, b) -> {
+                    throw new TestException("boom");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertItems(1)
+                .assertFailedWith(TestException.class, "boom");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testOnItemAfterCancellation() {
         AtomicReference<Flow.Subscriber<? super Integer>> ref = new AtomicReference<>();
         AbstractMulti<Integer> upstream = new AbstractMulti<Integer>() {

@@ -5,12 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.Mocks;
 import mutiny.zero.flow.adapters.AdaptersToFlow;
@@ -42,6 +45,35 @@ public class FlatMapMainSubscriberTest {
 
         sub.request(-1);
         subscriber.assertFailedWith(IllegalArgumentException.class, "");
+    }
+
+    @Test
+    public void testInvalidRequestCancelsUpstreamAndStopsEmitting() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onItem().transformToMultiAndMerge(i -> Multi.createFrom().item(i))
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.request(-1);
+        subscriber.assertFailedWith(IllegalArgumentException.class);
+
+        emitter.get().emit(42);
+        subscriber.assertHasNotReceivedAnyItem();
+        assertThat(upstreamCancelled).isTrue();
+    }
+
+    @Test
+    public void testFailedInnerIsNotCancelled() {
+        AtomicBoolean innerCancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1)
+                .onItem().transformToMultiAndMerge(i -> Multi.createFrom().<Integer> failure(new IOException("boom"))
+                        .onCancellation().invoke(() -> innerCancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertFailedWith(IOException.class, "boom");
+        assertThat(innerCancelled).isFalse();
     }
 
     @Test

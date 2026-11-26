@@ -435,6 +435,18 @@ public class MultiCombineTest {
     }
 
     @Test
+    public void testCombiningWithFailureAndCollectFailureCancelsLaterStreams() {
+        MultiOnCancellationSpy<Integer> spy = Spy.onCancellation(Multi.createFrom().nothing());
+
+        Multi.createBy().combining().streams(Multi.createFrom().<Integer> failure(new IOException("boom")), spy)
+                .collectFailures().asTuple()
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(IOException.class, "boom");
+
+        assertThat(spy.isCancelled()).isTrue();
+    }
+
+    @Test
     public void testCombinationOfAFailingStream() {
         assertThrows(CompletionException.class, () -> {
 

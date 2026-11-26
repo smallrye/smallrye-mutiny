@@ -54,7 +54,7 @@ public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
         private void forwardResult(T res, Throwable fail) {
             if (!cancelled) {
                 if (fail != null) {
-                    if (fail instanceof CompletionException) {
+                    if (fail instanceof CompletionException && fail.getCause() != null) {
                         subscriber.onFailure(fail.getCause());
                     } else {
                         subscriber.onFailure(fail);

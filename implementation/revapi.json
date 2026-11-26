@@ -51,7 +51,15 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [ {
+      "ignore" : true,
+      "code" : "java.method.visibilityIncreased",
+      "old" : "method void io.smallrye.mutiny.operators.multi.MultiOperatorProcessor<I, O>::failAndCancel(java.lang.Throwable)",
+      "new" : "method void io.smallrye.mutiny.operators.multi.MultiOperatorProcessor<I, O>::failAndCancel(java.lang.Throwable)",
+      "oldVisibility" : "package",
+      "newVisibility" : "protected",
+      "justification" : "Internal refactoring: operator processors in the io.smallrye.mutiny.operators.multi.overflow sub-package need to call this method. MultiOperatorProcessor is an internal class and the change is binary compatible."
+    } ]
   }
 }, {
   "extension" : "revapi.reporter.json",

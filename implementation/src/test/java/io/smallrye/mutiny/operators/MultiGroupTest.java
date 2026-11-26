@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -31,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +42,9 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
@@ -467,13 +473,58 @@ public class MultiGroupTest {
     }
 
     @Test
-    public void rejectBadRequestOnTineWindow() {
-        AssertSubscriber<?> sub = Multi.createBy().concatenating().streams(
-                Multi.createFrom().range(1, 7),
-                Multi.createFrom().range(100, 200))
-                .group().intoMultis().every(Duration.ofMillis(1))
-                .subscribe().withSubscriber(AssertSubscriber.create());
-        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    public void testTimeWindowWithoutDemandCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Multi<Object>> subscriber = Multi.createFrom().nothing()
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .group().intoMultis().every(Duration.ofMillis(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        subscriber.awaitFailure().assertFailedWith(BackPressureFailure.class);
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testTimeWindowWithoutInitialDemandSignalsASingleFailure() {
+        Multi.createFrom().empty()
+                .group().intoMultis().every(Duration.ofSeconds(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
+                .assertFailedWith(BackPressureFailure.class);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("groupingOperators")
+    public void rejectBadRequestAndCancelUpstream(String name, Function<Multi<Integer>, Multi<?>> operator) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<?> subscriber = operator.apply(Multi.createFrom().<Integer> emitter(e -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        subscriber.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> groupingOperators() {
+        return Stream.of(
+                Arguments.of("intoLists().of(2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(2)),
+                Arguments.of("intoLists().of(2, 3)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(2, 3)),
+                Arguments.of("intoLists().of(3, 2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(3, 2)),
+                Arguments.of("intoLists().of(2, Duration)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(2, Duration.ofSeconds(30))),
+                Arguments.of("intoMultis().of(2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(2)),
+                Arguments.of("intoMultis().of(2, 3)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(2, 3)),
+                Arguments.of("intoMultis().of(3, 2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(3, 2)),
+                Arguments.of("intoMultis().every(Duration)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().every(Duration.ofSeconds(30))),
+                Arguments.of("by(i -> i % 2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().by(i -> i % 2)));
     }
 
     @Test
@@ -871,6 +922,66 @@ public class MultiGroupTest {
         subscriber.assertFailedWith(NullPointerException.class, "");
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("failingGroupBySelectors")
+    public void groupByFailingSelectorFailsGroupsAndCancelsUpstream(String name,
+            Function<Multi<Integer>, Multi<GroupedMulti<Integer, Integer>>> operator) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = operator
+                .apply(Multi.createFrom().<Integer> emitter(emitter::set)
+                        .onCancellation().invoke(() -> cancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        emitter.get().emit(0);
+        AssertSubscriber<Integer> group = subscriber.getItems().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        emitter.get().emit(1);
+
+        subscriber.assertFailedWith(TestException.class, "boom");
+        group.assertFailedWith(TestException.class, "boom");
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> failingGroupBySelectors() {
+        return Stream.of(
+                Arguments.of("key selector",
+                        (Function<Multi<Integer>, Multi<GroupedMulti<Integer, Integer>>>) m -> m.group().by(i -> {
+                            if (i == 1) {
+                                throw new TestException("boom");
+                            }
+                            return i;
+                        })),
+                Arguments.of("value selector",
+                        (Function<Multi<Integer>, Multi<GroupedMulti<Integer, Integer>>>) m -> m.group().by(i -> i % 2,
+                                i -> {
+                                    if (i == 1) {
+                                        throw new TestException("boom");
+                                    }
+                                    return i;
+                                })));
+    }
+
+    @Test
+    public void groupByStopsCreatingGroupsAfterCancellation() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .group().by(i -> i % 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        emitter.get().emit(0);
+        AssertSubscriber<Integer> group = subscriber.getItems().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        subscriber.cancel();
+        emitter.get().emit(1);
+        group.cancel();
+
+        assertThat(subscriber.getItems()).hasSize(1);
+        assertThat(cancelled).isTrue();
+    }
+
     @Test
     public void testCancellationOnUpstream() {
         AssertSubscriber<GroupedMulti<Long, Long>> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(2))
@@ -1072,6 +1183,24 @@ public class MultiGroupTest {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    void rejectedFlushScheduleMustCancelUpstream() {
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+        executor.shutdown();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<List<Integer>> subscriber = new MultiBufferWithTimeoutOp<>(
+                Multi.createFrom().<Integer> emitter(emitter::set)
+                        .onCancellation().invoke(() -> cancelled.set(true)),
+                2, Duration.ofSeconds(10), executor, false)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        emitter.get().emit(1);
+
+        subscriber.assertFailedWith(RejectedExecutionException.class);
+        assertThat(cancelled).isTrue();
     }
 
     @Nested

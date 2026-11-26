@@ -30,7 +30,7 @@ public class GeneratorBasedMulti<T, S> extends AbstractMulti<T> {
         try {
             initialState = initialStateSupplier.get();
         } catch (Throwable err) {
-            downstream.onFailure(err);
+            Subscriptions.fail(downstream, err);
             return;
         }
         downstream.onSubscribe(new GeneratorSubscription(downstream, initialState));

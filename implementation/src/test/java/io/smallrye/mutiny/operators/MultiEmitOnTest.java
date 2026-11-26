@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -76,6 +77,21 @@ public class MultiEmitOnTest {
     }
 
     @Test
+    public void testWithInvalidRequestCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .emitOn(executor)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(-1L);
+        subscriber.awaitFailure()
+                .assertFailedWith(IllegalArgumentException.class, Subscriptions.getInvalidRequestException().getMessage());
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testWithShutdownExecutor() {
         ExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.shutdownNow();
@@ -85,6 +101,21 @@ public class MultiEmitOnTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber.assertFailedWith(RejectedExecutionException.class, "");
+    }
+
+    @Test
+    public void testRejectedExecutionCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .emitOn(command -> {
+                    throw new RejectedExecutionException("rejected");
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertFailedWith(RejectedExecutionException.class, "rejected");
+        assertThat(cancelled).isTrue();
     }
 
     @Test

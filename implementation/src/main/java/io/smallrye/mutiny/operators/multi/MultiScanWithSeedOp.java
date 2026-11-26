@@ -144,11 +144,11 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
             try {
                 r = accumulator.apply(r, t);
             } catch (Throwable e) {
-                onFailure(e);
+                failAndCancel(e);
                 return;
             }
             if (r == null) {
-                onFailure(new NullPointerException("The accumulator returned a null value"));
+                failAndCancel(new NullPointerException("The accumulator returned a null value"));
                 return;
             }
             downstream.onItem(r);

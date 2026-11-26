@@ -181,6 +181,8 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
         public void onSubscribe(Subscription s) {
             if (this.upstream.compareAndSet(null, s)) {
                 s.request(bufferSize);
+            } else {
+                s.cancel();
             }
         }
 
@@ -578,9 +580,8 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
                     p.drain();
                 }
             } else {
-                PublishSubscriber<T> parent = this.parent.get();
-                parent.failureOrCompletion.set(Subscriptions.getInvalidRequestException());
-                parent.drain();
+                cancel();
+                downstream.onError(Subscriptions.getInvalidRequestException());
             }
         }
 

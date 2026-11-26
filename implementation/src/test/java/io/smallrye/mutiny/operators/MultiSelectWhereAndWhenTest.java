@@ -62,6 +62,17 @@ public class MultiSelectWhereAndWhenTest {
     }
 
     @Test
+    public void cannotRequestZeroItemsAndCancelsUpstream() {
+        MultiOnCancellationSpy<Integer> spy = Spy.onCancellation(Multi.createFrom().nothing());
+        AssertSubscriber<Integer> sub = spy
+                .select().where(n -> n % 2 == 0)
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0);
+        sub.assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+        assertThat(spy.isCancelled()).isTrue();
+    }
+
+    @Test
     public void testFilteringWithPredicate() {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)

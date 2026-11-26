@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -43,7 +44,9 @@ public class UniBlockingAwait {
 
             @Override
             public void onSubscribe(UniSubscription subscription) {
-                upstreamSubscription.set(subscription);
+                if (!upstreamSubscription.compareAndSet(null, subscription)) {
+                    subscription.cancel();
+                }
             }
 
             @Override
@@ -63,17 +66,18 @@ public class UniBlockingAwait {
             if (duration != null) {
                 if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
                     referenceToFailure.compareAndSet(null, new TimeoutException());
-                    UniSubscription subscription = upstreamSubscription.getAndSet(null);
-                    if (subscription != null) {
-                        subscription.cancel();
-                    }
+                    cancel(upstreamSubscription);
                 }
             } else {
                 latch.await();
             }
         } catch (InterruptedException e) {
             referenceToFailure.compareAndSet(null, e);
-            Thread.currentThread().interrupt();
+            try {
+                cancel(upstreamSubscription);
+            } finally {
+                Thread.currentThread().interrupt();
+            }
         }
 
         Throwable throwable = referenceToFailure.get();
@@ -84,6 +88,13 @@ public class UniBlockingAwait {
             throw new CompletionException(throwable);
         } else {
             return reference.get();
+        }
+    }
+
+    private static void cancel(AtomicReference<UniSubscription> upstreamSubscription) {
+        UniSubscription subscription = upstreamSubscription.getAndSet(EmptyUniSubscription.CANCELLED);
+        if (subscription != null) {
+            subscription.cancel();
         }
     }
 

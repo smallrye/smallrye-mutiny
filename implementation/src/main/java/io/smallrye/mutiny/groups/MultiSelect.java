@@ -127,7 +127,7 @@ public class MultiSelect<T> {
      * Once the duration expires, it cancels the subscription to the upstream, and completes the produced
      * {@link Multi}.
      *
-     * @param duration the duration, must not be {@code null}, must be strictly positive.
+     * @param duration the duration, must not be {@code null}, must be at least 1 millisecond.
      * @return the resulting {@link Multi}
      */
     @CheckReturnValue

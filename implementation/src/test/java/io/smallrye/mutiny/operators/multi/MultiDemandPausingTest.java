@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.DemandPauser;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiDemandPausingTest {
@@ -136,6 +138,47 @@ public class MultiDemandPausingTest {
                         .hasMessage("Buffer overflow: cannot buffer more than 20 items"));
 
         assertThat(sub.getItems()).hasSizeLessThan(100);
+    }
+
+    @Test
+    public void testBufferOverflowCancelsUpstream() {
+        DemandPauser pauser = new DemandPauser();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .pauseDemand()
+                .bufferStrategy(BackPressureStrategy.BUFFER)
+                .bufferSize(16)
+                .using(pauser)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        pauser.pause();
+        for (int i = 0; i < 20; i++) {
+            emitter.get().emit(i);
+        }
+
+        sub.assertFailedWith(IllegalStateException.class, "Buffer overflow: cannot buffer more than 16 items");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testInvalidRequestCancelsUpstream() {
+        DemandPauser pauser = new DemandPauser();
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(e -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .pauseDemand()
+                .using(pauser)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        sub.request(-1L);
+
+        sub.assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+        assertThat(cancelled).isTrue();
     }
 
     @Test

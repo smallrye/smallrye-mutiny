@@ -67,6 +67,27 @@ public class MultiOnRequestTest {
     }
 
     @Test
+    public void testInvokeThrowingExceptionCancelsUpstream() {
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
+
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        Multi.createFrom().emitter(e -> {
+            // Do nothing
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onRequest().invoke(count -> {
+                    throw new RuntimeException("woops");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testCall() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -125,6 +146,25 @@ public class MultiOnRequestTest {
     }
 
     @Test
+    public void testCallErrorCancelsUpstream() {
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
+
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        Multi.createFrom().emitter(e -> {
+            // Do nothing
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onRequest().call(count -> Uni.createFrom().failure(new RuntimeException("woops")))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testCallThrowingException() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -179,5 +219,20 @@ public class MultiOnRequestTest {
         AssertSubscriber<Integer> sub = multi.onRequest().call(n -> Uni.createFrom().item(n))
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @Test
+    public void rejectBadRequestsAndCancelUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        AssertSubscriber<Object> sub = Multi.createFrom().emitter(e -> {
+            // Do nothing
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onRequest().call(n -> Uni.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+        assertThat(cancelled).isTrue();
     }
 }

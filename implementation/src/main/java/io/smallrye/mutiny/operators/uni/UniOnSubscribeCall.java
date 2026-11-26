@@ -46,6 +46,7 @@ public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
             try {
                 uni = Objects.requireNonNull(callback.apply(subscription), "The produced Uni must not be `null`");
             } catch (Throwable e) {
+                subscription.cancel();
                 downstream.onSubscribe(EmptyUniSubscription.DONE);
                 downstream.onFailure(e);
                 return;

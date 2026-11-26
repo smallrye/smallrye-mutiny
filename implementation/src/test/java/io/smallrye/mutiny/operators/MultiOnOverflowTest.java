@@ -18,11 +18,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -33,6 +37,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
+import io.smallrye.mutiny.subscription.UniEmitter;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -208,6 +213,61 @@ public class MultiOnOverflowTest {
                 .onOverflow().dropPreviousItems()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testDropPreviousItemsWithThrowingInvokeDoesNotEmitAfterFailure() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 4)
+                .onOverflow().invoke(i -> {
+                    throw new IllegalStateException("boom");
+                }).dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        sub.assertFailedWith(IllegalStateException.class, "boom");
+        sub.request(1);
+        sub.assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
+    public void testDropPreviousItemsWithCallFailingAfterCompletionIsDropped() {
+        AtomicReference<MultiEmitter<? super Integer>> upstream = new AtomicReference<>();
+        List<UniEmitter<? super Object>> emitters = new CopyOnWriteArrayList<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom()
+                .emitter((Consumer<MultiEmitter<? super Integer>>) upstream::set)
+                .onOverflow().call(i -> Uni.createFrom().emitter(emitters::add)).dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        upstream.get().emit(1).emit(2).complete();
+        sub.request(1);
+        sub.assertItems(2).assertCompleted();
+
+        AtomicReference<Throwable> dropped = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(dropped::set);
+        try {
+            IOException late = new IOException("late");
+            emitters.get(0).fail(late);
+            assertThat(dropped.get()).isSameAs(late);
+        } finally {
+            Infrastructure.resetDroppedExceptionHandler();
+        }
+    }
+
+    @Test
+    public void testDropPreviousItemsWithFailingCallDoesNotEmitAfterFailure() {
+        AtomicReference<MultiEmitter<? super Integer>> upstream = new AtomicReference<>();
+        List<UniEmitter<? super Object>> emitters = new CopyOnWriteArrayList<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom()
+                .emitter((Consumer<MultiEmitter<? super Integer>>) upstream::set)
+                .onOverflow().call(i -> Uni.createFrom().emitter(emitters::add)).dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        upstream.get().emit(1).emit(2).emit(3);
+        emitters.get(0).fail(new IllegalStateException("boom"));
+
+        sub.assertFailedWith(IllegalStateException.class, "boom");
+        sub.request(1);
+        sub.assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -438,6 +498,36 @@ public class MultiOnOverflowTest {
         emitter.get().emit(1);
 
         sub.assertFailedWith(RuntimeException.class, "boom :: 1");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("failingDropCallbacks")
+    public void dropCallbackFailureCancelsUpstream(String name, Function<Multi<Integer>, Multi<Integer>> operator) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = operator.apply(Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        emitter.get().emit(1);
+
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> failingDropCallbacks() {
+        return Stream.of(
+                Arguments.of("invoke throwing",
+                        (Function<Multi<Integer>, Multi<Integer>>) m -> m.onOverflow().invoke(i -> {
+                            throw new IllegalStateException("boom");
+                        }).drop()),
+                Arguments.of("call throwing",
+                        (Function<Multi<Integer>, Multi<Integer>>) m -> m.onOverflow().call(i -> {
+                            throw new IllegalStateException("boom");
+                        }).drop()),
+                Arguments.of("call failing",
+                        (Function<Multi<Integer>, Multi<Integer>>) m -> m.onOverflow()
+                                .call(i -> Uni.createFrom().failure(new IllegalStateException("boom"))).drop()));
     }
 
     @Test

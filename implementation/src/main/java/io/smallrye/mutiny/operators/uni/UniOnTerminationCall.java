@@ -66,7 +66,7 @@ public class UniOnTerminationCall<I> extends UniOperator<I, I> {
 
         @Override
         public void onItem(I item) {
-            if (!isCancelled()) {
+            if (!isCancelled() && !invoked.get()) {
                 cancellable = execute(item, null, false).subscribe().with(
                         context(),
                         ignored -> downstream.onItem(item),
@@ -76,7 +76,7 @@ public class UniOnTerminationCall<I> extends UniOperator<I, I> {
 
         @Override
         public void onFailure(Throwable failure) {
-            if (!isCancelled()) {
+            if (!isCancelled() && !invoked.get()) {
                 cancellable = execute(null, failure, false).subscribe().with(
                         context(),
                         ignored -> downstream.onFailure(failure),

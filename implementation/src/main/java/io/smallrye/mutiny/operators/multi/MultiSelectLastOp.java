@@ -74,7 +74,7 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void request(long n) {
             if (n <= 0) {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
                 return;
             }
             Subscriptions.add(requested, n);
@@ -130,6 +130,11 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
 
                             downstream.onItem(item);
                             count++;
+                        }
+
+                        if (queue.isEmpty() && getUpstreamSubscription() != Subscriptions.CANCELLED) {
+                            downstream.onCompletion();
+                            return;
                         }
 
                         if (count != 0L && req != Long.MAX_VALUE) {

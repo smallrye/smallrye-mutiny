@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
@@ -106,5 +107,19 @@ public class MultiIgnoreTest {
         subscriber
                 .request(-1)
                 .assertFailedWith(IllegalArgumentException.class, null);
+    }
+
+    @Test
+    public void testIllegalRequestsCancelUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Void> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().ignore()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        assertThat(cancelled).isTrue();
     }
 }

@@ -1,6 +1,10 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -35,5 +39,35 @@ public class UniEmitOnTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.awaitFailure().assertFailedWith(CompositeException.class);
+    }
+
+    @Test
+    void testItemNotForwardedWhenCancelledBeforeDispatchRuns() {
+        List<Runnable> tasks = new ArrayList<>();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                .emitOn(tasks::add)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThat(tasks).hasSize(1);
+        subscriber.cancel();
+        tasks.forEach(Runnable::run);
+
+        subscriber.assertNotTerminated();
+    }
+
+    @Test
+    void testFailureNotForwardedWhenCancelledBeforeDispatchRuns() {
+        List<Runnable> tasks = new ArrayList<>();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
+                .emitOn(tasks::add)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThat(tasks).hasSize(1);
+        subscriber.cancel();
+        tasks.forEach(Runnable::run);
+
+        subscriber.assertNotTerminated();
     }
 }

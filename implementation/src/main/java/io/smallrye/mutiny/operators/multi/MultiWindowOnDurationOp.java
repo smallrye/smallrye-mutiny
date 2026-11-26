@@ -79,6 +79,8 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         requested.decrementAndGet();
                     }
                 } else {
+                    terminated = true;
+                    super.cancel();
                     downstream.onFailure(new BackPressureFailure("no requests"));
                     return;
                 }
@@ -153,7 +155,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
             if (n > 0) {
                 Subscriptions.add(requested, n);
             } else {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -211,6 +213,8 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         } else {
                             current = null;
                             queue.clear();
+                            terminated = true;
+                            super.cancel();
                             actual.onError(new BackPressureFailure("no requests"));
                             timer.cancel();
                             return;

@@ -33,7 +33,7 @@ public class MultiOnRequestInvoke<T> extends AbstractMultiOperator<T, T> {
                 consumer.accept(numberOfItems);
                 super.request(numberOfItems);
             } catch (Throwable err) {
-                super.onFailure(err);
+                failAndCancel(err);
             }
         }
     }

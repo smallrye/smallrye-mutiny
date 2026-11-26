@@ -93,7 +93,7 @@ public class MultiSkip<T> {
      * If the upstream didn't emit any items before the delay expired, the produced {@link Multi} emits the same events
      * as the upstream.
      *
-     * @param duration the duration for which the items from upstream are skipped. Must be strictly positive.
+     * @param duration the duration for which the items from upstream are skipped. Must be at least 1 millisecond.
      * @return the resulting {@link Multi}
      */
     @CheckReturnValue

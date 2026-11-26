@@ -47,11 +47,11 @@ public final class MultiScanOp<T> extends AbstractMultiOperator<T, T> {
                 try {
                     result = accumulator.apply(current, item);
                 } catch (Throwable e) {
-                    onFailure(e);
+                    failAndCancel(e);
                     return;
                 }
                 if (result == null) {
-                    onFailure(new NullPointerException(ParameterValidation.MAPPER_RETURNED_NULL));
+                    failAndCancel(new NullPointerException(ParameterValidation.MAPPER_RETURNED_NULL));
                     return;
                 }
             }

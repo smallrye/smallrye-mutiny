@@ -60,7 +60,7 @@ public final class MultiSkipRepetitionsOp<T> extends AbstractMultiOperator<T, T>
                     request(1);
                 }
             } catch (Exception e) {
-                onFailure(e);
+                failAndCancel(e);
             }
         }
 

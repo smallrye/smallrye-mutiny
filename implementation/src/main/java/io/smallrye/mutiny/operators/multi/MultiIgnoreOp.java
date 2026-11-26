@@ -38,7 +38,7 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
             // Request is handled by the onSubscribe method
             // Just validate the parameter for compliance with Reactive Streams.
             if (numberOfItems <= 0) {
-                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                failAndCancel(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
             }
         }
 

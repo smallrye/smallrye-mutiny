@@ -131,6 +131,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 Subscriptions.add(requested, n);
                 drain();
             } else {
+                cancel();
                 downstream.onFailure(new IllegalArgumentException("Invalid requests, must be greater than 0"));
             }
         }
@@ -564,6 +565,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onFailure(Throwable failure) {
             Objects.requireNonNull(failure);
+            SUBSCRIPTION_UPDATER.set(this, Subscriptions.CANCELLED);
             parent.innerError(this, failure);
         }
 

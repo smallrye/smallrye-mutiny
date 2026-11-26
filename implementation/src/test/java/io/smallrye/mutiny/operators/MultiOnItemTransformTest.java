@@ -1,8 +1,10 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
@@ -71,6 +73,20 @@ public class MultiOnItemTransformTest {
                 .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().item(n))
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+    }
+
+    @Test
+    public void rejectsBadRequestsAndCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().transform(x -> x)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        assertThat(cancelled).isTrue();
     }
 
     @Test

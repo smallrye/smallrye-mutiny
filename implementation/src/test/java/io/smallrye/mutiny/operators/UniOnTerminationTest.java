@@ -20,6 +20,7 @@ import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniEmitter;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -237,5 +238,63 @@ public class UniOnTerminationTest {
 
         assertThat(upstreamCancelled).isTrue();
         assertThat(droppedException.get()).isInstanceOf(RuntimeException.class).hasMessage("cleanup failed");
+    }
+
+    @Test
+    void testCallbackNotInvokedOnCancellationAfterItem() {
+        var events = new ConcurrentLinkedQueue<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                .onTermination().invoke((item, failure, cancelled) -> events.add("item=" + item + ",cancelled=" + cancelled))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(1);
+        subscriber.cancel();
+
+        assertThat(events).containsExactly("item=1,cancelled=false");
+    }
+
+    @Test
+    void testCallbackNotInvokedOnCancellationAfterFailure() {
+        var events = new ConcurrentLinkedQueue<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
+                .onTermination()
+                .invoke((item, failure, cancelled) -> events.add("failure=" + failure + ",cancelled=" + cancelled))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(IOException.class, "boom");
+        subscriber.cancel();
+
+        assertThat(events).containsExactly("failure=java.io.IOException: boom,cancelled=false");
+    }
+
+    @Test
+    void testItemNotForwardedWhileCancellationCallIsPending() {
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(emitter::set)
+                .onTermination().call((item, failure, cancelled) -> Uni.createFrom().emitter(e -> {
+                }))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.cancel();
+        emitter.get().complete(42);
+
+        subscriber.assertNotTerminated();
+    }
+
+    @Test
+    void testFailureNotForwardedWhileCancellationCallIsPending() {
+        AtomicReference<Throwable> droppedException = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(droppedException::set);
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(emitter::set)
+                .onTermination().call((item, failure, cancelled) -> Uni.createFrom().emitter(e -> {
+                }))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.cancel();
+        emitter.get().fail(new IOException("boom"));
+
+        subscriber.assertNotTerminated();
+        assertThat(droppedException.get()).isInstanceOf(IOException.class).hasMessage("boom");
     }
 }

@@ -47,7 +47,7 @@ public class MultiFailOnItemTimeout<I> extends MultiOperator<I, I> {
         public void onSubscribe(Subscription subscription) {
             if (!scheduleTimeout()) {
                 subscription.cancel();
-                downstream.onSubscribe(EmptyUniSubscription.DONE);
+                return;
             }
             super.onSubscribe(subscription);
         }
@@ -59,7 +59,7 @@ public class MultiFailOnItemTimeout<I> extends MultiOperator<I, I> {
                 if (timeoutFuture != null) {
                     timeoutFuture.cancel(false);
                     if (!scheduleTimeout()) {
-                        //On failure is already called in scheduleTimeout
+                        // The rejection has already been signalled or dropped in scheduleTimeout
                         return;
                     }
                 }
@@ -104,7 +104,11 @@ public class MultiFailOnItemTimeout<I> extends MultiOperator<I, I> {
             if (sub == CANCELLED) {
                 return;
             }
-            sub.cancel();
+            if (sub == null) {
+                downstream.onSubscribe(EmptyUniSubscription.DONE);
+            } else {
+                sub.cancel();
+            }
 
             Throwable throwable;
             try {
@@ -126,7 +130,16 @@ public class MultiFailOnItemTimeout<I> extends MultiOperator<I, I> {
                 return true;
             } catch (RejectedExecutionException e) {
                 // Executor out of service.
-                getAndSetUpstreamSubscription(CANCELLED);
+                Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
+                if (subscription == CANCELLED) {
+                    Infrastructure.handleDroppedException(e);
+                    return false;
+                }
+                if (subscription == null) {
+                    downstream.onSubscribe(EmptyUniSubscription.DONE);
+                } else {
+                    subscription.cancel();
+                }
                 downstream.onFailure(e);
                 return false;
             }

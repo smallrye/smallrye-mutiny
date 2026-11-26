@@ -106,7 +106,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             try {
                 task = executor.schedule(() -> timerFired(gen), duration.toMillis(), TimeUnit.MILLISECONDS);
             } catch (RejectedExecutionException rejected) {
-                onFailure(rejected);
+                failAndCancel(rejected);
             }
         }
 
@@ -330,7 +330,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                     }
                 }
             } else {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
             }
         }
 
