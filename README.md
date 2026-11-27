@@ -6,7 +6,7 @@
 
 # ⚡️ Mutiny, an Intuitive Event-Driven Reactive Programming Library for Java
 
-[Mutiny is a modern reactive programming library for Java](https://smallrye.io/smallrye-mutiny/).
+[Mutiny is a modern reactive programming library for Java](https://smallrye.io/docs/smallrye-mutiny/latest/).
 
 Mutiny provides a simple but powerful asynchronous development model to build reactive applications.
 
@@ -51,7 +51,7 @@ In addition, Mutiny offers converters to interact with other popular libraries a
 
 ## 👓 Mutiny workshop examples
 
-You can learn about Mutiny from the [documentation and website](https://smallrye.io/smallrye-mutiny).
+You can learn about Mutiny from the [documentation and website](https://smallrye.io/docs/smallrye-mutiny/latest/).
 
 This repository also contains the [Mutiny workshop examples](workshop-examples) that cover the common concerns through self-contained executable [JBang](https://www.jbang.dev/) scripts.
 
